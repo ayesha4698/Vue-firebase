@@ -1,0 +1,282 @@
+<html>
+
+<head>
+  <title>INFO 3300 -HW3</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Lato:400,700|Raleway:400,700" rel="stylesheet">
+
+
+
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.14.2/styles/default.min.css">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.14.2/highlight.min.js"></script>
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+
+  <style>
+    .hellodiv {
+      padding: 10px;
+      margin: 20px;
+    }
+  </style>
+
+</head>
+
+<body>
+<ul id ="p1">
+<li> A.) Sequential.
+I think it is slightly ineffective because it seems to use only one color, which is ideal but the discrepancies are too small to notice any differences that could be tied to a scale. 
+It also incorporate luminosity. It also experirences the diferent saturation smoothly. </li>
+
+<li> B.) It isnt effective because while it does have a similar pattern to the data 
+the middle is too saturated for it to be eefffective. </li> 
+
+<li> C.)Pronatopia, Achromotopsia, Deuteranopia, Prontonamly, Blue cone monochromacy, and deutreranomoly.  </li> 
+
+<li> D.) Rainbows are good for hue to quantitative attribute but I wouldn't recommend this 
+scale because it doesn't create a defined sections that can be easily tied to a scale or category.
+It is also unordered and not continuous.  </li> 
+
+</ul>
+<br/>
+<br/>
+<p id="p2">Problem 2: 
+<br/>
+
+<script> 
+  
+
+  let svgContainer = d3
+   .select("#p2").append("svg").attr("width","300").attr("height","200")
+
+  let cord = [[10, 9.14], [8, 8.14], [13, 8.74], [9, 8.77], [11, 9.26], [14, 8.1], [6, 6.13], [4, 3.1], [12, 9.13], [7, 7.26], [5, 4.74]];
+  
+  var xscale = d3.scaleLinear()
+    .domain([0, 15])
+    .range([20, 290]);  
+
+  var yscale = d3.scaleLinear()
+        .domain([0, 10])
+        .range([176, 6]); 
+
+  cord.forEach(function(d){
+   
+    svgContainer.append("circle")
+         .attr("r", 3)
+         .attr("cx", xscale(d[0]))
+         .attr("cy", yscale(d[1])) 
+        .style("fill", "blue")
+        
+  });
+
+  d3.selectAll("circle").on("click", function() {
+    d3.select(this).style("fill", "red");
+  });
+
+  for (i = 0; i < 16; i++) { 
+    svgContainer.append("line")
+    .attr("x1", xscale(i))
+    .attr("x2",  xscale(i))
+    .attr("y1", 6)
+    .attr("y2", 176)
+    .style("stroke", "black")
+    .style("opacity", ".3")
+  }
+  for (i = 0; i < 11; i++) { 
+    svgContainer.append("line")
+    .attr("x1", 20)
+    .attr("x2",  290)
+    .attr("y1", yscale(i))
+    .attr("y2", yscale(i))
+    .style("stroke", "black")
+    .style("opacity", ".3")
+  }
+
+
+  var x_axis = d3.axisBottom()
+        .scale(xscale)
+        .tickValues([0, 5, 10, 15])
+        .tickSize(0);
+
+  var y_axis = d3.axisLeft()
+        .scale(yscale)
+        .tickValues([0, 5, 10])
+        .tickSize(0);
+        
+
+  svgContainer.append("g")
+       .attr("transform", "translate(20, 0)")
+       .call(y_axis);
+
+
+
+    svgContainer.append("g")
+            .attr("transform", "translate(0, 176)")
+            .call(x_axis)
+      
+            
+
+</script>
+</p>
+<br/>
+<p id="p3">Problem 3: 
+
+<script> 
+console.log("hi")
+try {
+ diamondData =
+
+        d3.json("diamond.json").then(function (  data) {
+         
+         
+
+          let svg3  = d3
+            .select("#p3").append("svg").attr("width","400").attr("height","400")
+            .style("display", "flex")
+            
+
+          
+
+          let xscale = d3.scaleLinear()
+            .domain([0, maxCarat])
+            .range([0, 395]);  
+
+          let yscale = d3.scaleLinear()
+                .domain([0, maxPrice])
+                .range([400,5]);
+        console.log( Math.ceil(maxPrice))
+          for (i = 0; i < 18803;  i += 1000) {
+          console.log("linekkk")
+          svg3.append("line")
+          .attr("x1", 0)
+          .attr("x2",  395)
+          .attr("y1", yscale(i))
+          .attr("y2", yscale(i))
+          .style("stroke", "black")
+        
+        }
+         
+          for (i = 0; i < 3;  i ++) {
+          console.log("linekkk")
+          svg3.append("line")
+          .attr("x1", xscale(i))
+          .attr("x2",  xscale(i))
+          .attr("y1", 5)
+          .attr("y2", 400)
+          .style("stroke", "black")
+        
+        }
+
+        data.forEach(function(d){
+          console.log("hello")
+          svg3.append("circle")
+            .attr("r", 3)
+            .attr("cx", Math.floor(xscale(d['carat'])))
+            .attr("cy", Math.floor( yscale(d['price']))) 
+            .style("fill", "darkblue")
+            .style("opacity", ".4")
+        
+        });
+  
+        let svg4  = d3.select("#p3").append("svg").attr("width","400").attr("height","400")
+
+        let maxQual = d3.max(data, function (d) { return d['color_rating'] });
+          console.log(maxQual)
+         
+        let x2scale = d3.scaleLinear()
+          .domain([0, 8])
+          .range([5, 395]);
+
+        for (i = 0; i < 8;  i ++) {
+        console.log("linekkk")
+        svg4.append("line")
+        .attr("x1", x2scale(i))
+        .attr("x2",  x2scale(i))
+        .attr("y1", 0)
+        .attr("y2", 400)
+        .style("stroke", "black")
+        
+        }  
+        for (i = 0; i < 18803;  i += 1000) {
+          console.log("linekkk")
+          svg4.append("line")
+          .attr("x1", 5)
+          .attr("x2",  395)
+          .attr("y1", yscale(i))
+          .attr("y2", yscale(i))
+          .style("stroke", "black")
+        
+        }
+    
+            
+          data.forEach(function(d){
+          console.log("hello")
+          svg4.append("circle")
+            .attr("r", 3)
+            .attr("cx", Math.floor(x2scale(d['color_rating'])+ (Math.random()*10)-5) )
+            .attr("cy", Math.floor(yscale(d['price'])+ (Math.random()*10) - 5)) 
+            .style("fill", "darkgreen")
+            .style("opacity", ".3")
+        
+        });
+        let svg5  = d3 .select("#p3").append("svg").attr("width","400").attr("height","400")
+
+
+        let maxCaratperP = d3.max(data, function (d) { return d['price']/d['carat'] });
+        console.log(maxCaratperP)
+
+        let y2scale = d3.scaleLinear()
+              .domain([0, maxCaratperP])
+              .range([400,5]);
+
+        for (i = 0; i < 8;  i ++) {
+        console.log("linekkk")
+        svg5.append("line")
+        .attr("x1", x2scale(i))
+        .attr("x2",  x2scale(i))
+        .attr("y1", 0)
+        .attr("y2", 400)
+        .style("stroke", "black")
+        
+        }  
+       for (i = 0; i < maxCaratperP;  i += 1000) {
+          console.log("linekkk")
+          svg5.append("line")
+          .attr("x1", 5)
+          .attr("x2",  395)
+          .attr("y1", y2scale(i))
+          .attr("y2", y2scale(i))
+          .style("stroke", "black")
+        
+        }
+          
+
+          data.forEach(function(d){
+          console.log("hello")
+          svg5.append("circle")
+            .attr("r", 3)
+            .attr("cx", Math.floor(x2scale(d['color_rating'])+ (Math.random()*10) - 5)) 
+            .attr("cy", Math.floor(y2scale(d['price']/d['carat'])+ (Math.random()*10) - 5)) 
+            .style("fill", "darkred")
+            .style("opacity", ".3")
+        
+        });
+      
+         
+            
+    }); 
+
+}
+catch(err){
+  console.error("bad JSON")
+}
+</script>
+</br>
+This data might be misleading beccause it seems to demonstrate a negative correlation as 
+color quality increases. However this is may not be the present int the data and thus is misleading.  
+</p>
+<br/>
+
+
+
+</body>
+
+</html>

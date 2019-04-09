@@ -1,0 +1,99 @@
+<html>
+
+<title>INFO 3300 - HW1</title>
+
+<p id="p1">Problem 1:
+
+    <br />
+    <strong>a.)</strong> <br />
+    MARKS: The containment of the geographic US reagions with 13 different colored polygons.
+    <br />
+    CHANNELS: The Range of colors/hues as well. The numerical scale corresponding to
+    the color changes to represent the fraction of lost percepitation as well. Unaligned and unaligned length of
+    polygons.
+    <br />
+    <strong>b.)</strong> <br />
+    MARKS: The red, blue, and green colored circles.
+    <br />
+    CHANNELS: The range of hue for each color. The position of the circle on the coordinate grid.
+
+</p>
+
+<p id="p2">Problem 2:
+    <br />
+
+    Valid types are: string, number, boolean, and object,
+
+    <script>
+        var func = new Function();
+
+        console.log(typeof ('Hello World'));
+        console.log(typeof ({}));
+        console.log(typeof (3));
+        console.log(typeof (true));
+        console.log(typeof (func));
+
+        console.log(typeof (regex));
+        console.log(typeof (int));
+        console.log(typeof (unicode));
+        console.log(typeof (list));
+        console.log(typeof (map));
+
+        console.log(typeof (new Map()));
+        console.log(typeof (1));
+        console.log(typeof (1.3));
+        console.log(typeof (null));
+
+    </script>
+
+    The unexpected behavior came from float, int, and null.
+    Because for float and int returns number which is
+    unexpected given the expected result would be their respective types
+    And null returns object despite not being valid.
+</p>
+
+
+<p id="p3">Problem 3:<br />
+    a.)Didnt have "". { "netid": "jmr395" }<br />
+    b.)JSON doesnt support comments. { "comment": "choose one of these options", "number": "CS3300" }<br />
+    c.)The Semicolons. [3, 4.3, null]<br />
+    d.)The quotations and ;.[ { "name": "DDWA", "number": 3300 } ,{ "name": "Java", "number": 2110 }, {
+    "name":"Python", "number": 1110 }]<br />
+
+    <script>
+        console.log(JSON.parse('{ "netid": "jmr395" }'));
+        console.log(JSON.parse('{ "comment": "choose one of these options", "number": "INFO3300/CS3300/INFO5100" }'));
+        console.log(JSON.parse('[3, 4.3, null]'));
+        console.log(JSON.parse('[ { "name": "DDWA", "number": 3300 } ,{ "name": "Java", "number": 2110 }, { "name":"Python", "number": 1110 }]'));
+    </script>
+
+
+</p>
+
+<p id="p4">Problem 4:
+    '[{"age" : 19, "interest": ["cooking","drinking"] , "isSingle" : true},{"age" : 20, "interest":
+    ["eating","cleaning"] ,
+    "isSingle" : false},{"age" : 90, "interest": ["sleeping","crying"] , "isSingle" : true}]'
+    <script>
+        var obj1 = { "age": 19, "interest": ["cooking", "drinking"], "isSingle": true };
+        var obj2 = { "age": 20, "interest": ["eating", "cleaning"], "isSingle": false };
+        var obj3 = { "age": 90, "interest": ["sleeping", "crying"], "isSingle": true };
+
+        var list = [obj1, obj2, obj3];
+        var txt2 = JSON.stringify(list);
+        var txt = '[{"age" : 19, "interest": ["cooking","drinking"] , "isSingle" : true},{"age" : 20, "interest": ["eating","cleaning"] , "isSingle" : false},{"age" : 90, "interest": ["sleeping","crying"] , "isSingle" : true}]';
+
+        console.log((JSON.parse(txt)));
+        console.log((JSON.parse(txt2)));
+
+    </script>
+</p>
+
+<p id="p4">Problem 5>
+    The sllyabus says, "If you do not submit work by the deadline, or if you submit a file that does not contain the
+    correct work, we will record a zero."
+    For unreadable work, the sllyabus says in certain circumstances the student may show an example from github
+    where the last commit with all the relevant code is posted before the deadline.
+</p>
+
+</html>

@@ -1,0 +1,232 @@
+<html>
+
+<title> CS 3300 - HW4 </title>
+
+<head>
+
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <style>
+    .gridlines line {
+      stroke: #bbb;
+    }
+
+    .gridlines .domain {
+      stroke: none;
+    }
+
+    #mars .line {
+      stroke: rgb(175, 84, 211);
+      fill: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <p id="p1">
+    <h2> Problem 1 : Blockbuster.json</h2> <br />
+    I found many data issues, and I solved them in the following ways: <br />
+    In the worldwide_gross element of each movie component, there was a dollar sign ($) at the beginning, commas
+    seperating every three digits, and a whilte
+    space at the end. <br />
+    To solve this problem, I replaced the all the '$', commas, and white space characters in the string using regex
+    before converting the string to a number. <br />
+    For the axes, I decided to
+    <br />
+    For the scales, I chose to use a scale Log for the y-axis and scale Linear for the x-axis because this was the best
+    combination of scales to showcase the variation of the different data points so that no particular area was too
+    concentrated. <br />
+    For the circle data points, I had to add a letter "a" at the beginning of every id because HTML requires the first
+    character of ids to be a letter for compatibility. <br />
+    The possible benefits of changing the circle size with each mouseover is that users are able to clearly see which
+    specifc data point they are hovering over. It can be confusing when multiple data points overlap on a graph, so by
+    increasing the radius and adding text with each hover over, users can distiguish specific circles from others
+    surrounding or overlapping it. <br />
+
+
+    <script>
+      let blockbust = d3.select("#p1").append("svg").attr("width", "800").attr("height", "500");
+
+      let blockbustersData = d3.json("blockbusters.json");
+
+      blockbustersData.then(function (data) {
+        data.forEach((d, i) => {
+          d['rank_in_year'] = Number(d["rank_in_year"]);
+          d['worldwide_gross'] = Number((d["worldwide_gross"]).replace(/\$/g, "").replace(/\s/g, "").replace(/,/g, ""));
+          d['length'] = Number(d["length"]);
+          d['imdb_rating'] = Number(d["imdb_rating"]);
+          d['year'] = Number(d["year"]);
+        });
+
+        data = data.filter(d => d['year'] != 0 && d['imdb_rating'] != 0 && d['length'] != 0 && d['rank_in_year'] != 0 && d['worldwide_gross'] != 0 && !isNaN(d['worldwide_gross']) && !isNaN(d['year']) && !isNaN(d['rank_in_year']) && d['Main_Genre'] != "N/A" && d['title'] != "N/A");
+
+        // console.log(data);
+
+        let len = Object.keys(data).length;
+        console.log(len);
+        const yearMin = d3.min(data, d => d['year']);
+        const yearMax = d3.max(data, d => d['year']);
+        const worldMin = d3.min(data, d => d['worldwide_gross']);
+        const worldMax = d3.max(data, d => d['worldwide_gross']);
+        const imdbMin = d3.min(data, d => d['imdb_rating']);
+        const imdbMax = d3.max(data, d => d['imdb_rating']);
+
+        let margin = { top: 30, right: 162, bottom: 10, left: 50 },
+          width = 800 - margin.right - margin.left,
+          height = 500 - margin.top - margin.bottom - 20;
+
+        // console.log(imdbMin);
+        // console.log(imdbMax);
+
+        //x axis
+        const yearScale = d3.scaleLinear().domain([yearMin, yearMax]).range([0, width]);
+        //y-axis
+        const worldScale = d3.scaleLog().domain([worldMin, worldMax]).range([height, 0]);
+
+        let xAxis = d3.axisBottom(yearScale);
+        let Xelement = blockbust.append("g")
+          //.attr("transform", "translate(" + -20 + ", " + 480 + ")")
+          .attr("transform", "translate(" + margin.left + ", " + (margin.top + height) + ")")
+        xAxis(Xelement);
+
+        let yAxis = d3.axisLeft(worldScale);
+        let Yelement = blockbust.append("g")
+          //.attr("transform", "translate(" + 20 + ",0)")
+          .attr("transform", "translate(" + (margin.left - 10) + "," + margin.top + ")")
+        yAxis(Yelement);
+
+        let Ygridlines = d3.axisLeft(worldScale).tickSize(-width).tickFormat("");
+        blockbust.append("g")
+          .attr("class", "y gridlines")
+          .attr("transform", "translate(" + (margin.left - 10) + "," + margin.top + ")")
+          .call(Ygridlines);
+
+        let Xgridlines = d3.axisBottom(yearScale).tickSize(-height).tickFormat("");
+        blockbust.append("g")
+          .attr("class", "x gridlines")
+          .attr("transform", "translate(" + margin.left + "," + (margin.top + height) + ")")
+          .call(Xgridlines);
+
+        //circle drawing
+        let movies = blockbust.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        //circle-size (?)
+        var circleScale = d3.scaleLog().domain([imdbMin + 1, imdbMax + 1]).range([4, 13]);
+        //circle-color
+        var colorScale = d3.scaleOrdinal(d3.schemeAccent.concat(d3.schemeDark2));
+        //each scheme had 8 colors and since there were 16 genres I concatenated two sets of scheme colors
+
+        data.forEach(function (d, i) {
+          let points = movies.append("circle")
+            .attr("r", circleScale(d['imdb_rating']))
+            .attr("cx", yearScale(d['year']))
+            .attr("cy", worldScale(d['worldwide_gross']))
+            .style("fill", colorScale(d["Main_Genre"]))
+            .style("opacity", 0.7)
+            .attr("movie", d["title"]);
+
+          points.on("mouseover", function () {
+            // console.log(d3.select(this));
+            d3.select(this)
+              .transition().duration(200)
+              .attr("r", circleScale(d['imdb_rating']) * 2)
+              .style("stroke", "#000");
+
+            // Add movie text
+            movies.append("text")
+              .attr("id", "a" + d['title'].replace(/[ _\-,.&:'#!\?]/g, ""))
+              .attr("x", yearScale(d['year']) - 45)
+              .attr("y", worldScale(d['worldwide_gross']) - 15)
+              .text(d['title']);
+          });
+
+          //ISSUE WITH 2012 and titles with numbers and symbols
+
+          points.on("mouseout", function () {
+            d3.select(this).transition().duration(200)
+              .attr("r", circleScale(d['imdb_rating']))
+              .style("stroke", "none");
+            d3.select("#a" + d['title'].replace(/[ _\-,.&:'#!\?]/g, "")).remove();
+          });
+
+        });
+
+
+      });
+    </script>
+  </p>
+
+  <p id="p2">Problem 2: Projectile Motion <br />
+    <svg id="mars" height="400" width="400">
+      <g id="background" style="stroke: #000; stroke-width: 2px; fill: none;">
+        <!--- Wall is 13 meters from pitcher. 20 meters tall and 4 meters thick. Target is between 8 meters and 18 meters from the wall. --->
+        <path d="M75 350 H 140 V 250 H 160 V 350 H 350" />
+
+        <!--- 1 meter is 5px, so our pitcher is at (15,10) from the lower left corner --->
+        <circle id="pitcher" cx="75" cy="350" r="5" style="fill: #EEF" />
+
+        <!-- Our target is between (40,10) and (50,10) from the lower left --->
+        <rect id="target" x="200" y="350" width="50" height="10" style="fill: #FDD" />
+      </g>
+    </svg>
+
+    <script>
+      let mars = d3.select("svg#mars");
+      let Mmargin = { top: 350, right: 50, bottom: 50, left: 75 },
+        Mwidth = 400 - Mmargin.right - Mmargin.left,
+        Mheight = 400 - Mmargin.top - Mmargin.bottom;
+
+      const xScale = d3.scaleLinear().domain([0, 55]).range([75, 350]);
+      const yScale = d3.scaleLinear().domain([0, 20]).range([350, 250]);
+
+      function trajectory(initialVelocity, angle) {
+        deg = angle * (Math.PI / 180);
+        Yacc = (-3.71 / 10);
+        Xacc = 0;
+        points = [{ "ground": 0, "x": 0, "y": 0, "xVelocity": initialVelocity * Math.cos(deg), "yVelocity": initialVelocity * Math.sin(deg), "xAcceleration": Xacc, "yAcceleration": Yacc }];
+        const count = 1;
+        const fall = false;
+        while (!fall) {
+          newVx = points[count - 1].xVelocity + 0;
+          newVy = points[count - 1].yVelocity + (-3.71 / 10);
+          newX = points[count - 1].x + newVx * 0.1;
+          newY = points[count - 1].y + newVy * 0.1;
+          newG = newX >= 13 && newX <= 17 ? 20 : 0;
+          if (newG) {
+            fall = true;
+          }
+          points.push({ "ground": newG, "x": newX, "y": newY, "xVelocity": newVx, "yVelocity": newVy, "xAcceleration": 0, "yAcceleration": (-3.71 / 10) })
+
+        }
+        return points;
+      };
+
+      function plotTrajectory(points, color) {
+        points.forEach(function (d, i) {
+          const line = d3.line()
+            .x((d, i) => xScale(i))
+            .y(d => yScale(i))
+            .attr("opacity", ".25")
+            .attr("stroke", color)
+            .attr("stroke-width", 5);
+        });
+      }
+
+      function trajectoryWithWind(points, color) {
+        points.forEach(function (d, i) {
+          const line = d3.line()
+            .x((d, i) => xScale(i))
+            .y(d => yScale(i));
+        });
+      }
+
+      mars.append("g").attr("transform", "translate(" + Mmargin.left + "," + Mmargin.top + ")")
+        .append("path").attr("class", "line");
+      const ball = trajectory(14, 75);
+      plotTrajectory(ball, "#abb043");
+
+    </script>
+  </p> <br />
+
+</body>
+
+</html>

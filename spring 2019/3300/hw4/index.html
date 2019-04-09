@@ -1,0 +1,393 @@
+<html>
+
+<head>
+  <title>INFO 3300 - HW4</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Lato:400,700|Raleway:400,700" rel="stylesheet">
+
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.14.2/styles/default.min.css">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.14.2/highlight.min.js"></script>
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <style>
+    .gridlines line {
+      stroke: #bbb;
+    }
+
+    .gridlines .domain {
+      stroke: none;
+    }
+
+    
+</style>
+
+</head>
+
+
+<body>
+<p id="p1"><br>Problem 1:<br>
+<ol type="A">
+    <li>The data issues were that the dollar values had
+     both commas and a dollar sign. Then the number 
+     were all strings. Then the NA, empty strings,
+      and N/A were not filtered from the data. </li>
+    <li> For the scales I choose a scale log for the y axis and a linear scale for the xscale. This was to help ensure one part of the graph wasnt too concentrated. For the axes I made them just go to their repective min and max and take up the whole chart size. I also didnt change their format since they already convey the informaiton nicely.</li>
+    <li>For the circle I added a dummy text letter followed by the movie title as its id.  </li>
+    <li>The key benefit is that by increasing radius will help spot which circle is beign hovered on and which text is for which circle. Whats confusing if multiple circles happen to both be mousedover then its possible that their titles are both up. So to combat having too many title appear when circles are concentrated I added a transistion to help ease the appearance</li>
+
+</ol>
+</p>
+
+<p id="p2">Problem 2:<br>
+
+
+</p>
+
+<script>
+//////Q1////////////////////////////
+  var  blockbustersData = [];
+  var maxY = 0;
+  var min = 0;
+  let  busterFunc =  d3.json("blockbusters.json").then( function(data) {
+      //turn strings into 
+    data.forEach( (d, i) => {
+          
+      d['rank_in_year'] =  Number(d["rank_in_year"])  ;
+      d['year'] =  Number(d['year'])   ;
+      d['imdb_rating'] =  Number(d['imdb_rating'].replace(/,/g,""))   ;
+      d['length'] =  Number(d['length'].replace(/,/g,"")) ;
+      d["worldwide_gross" ] =  Number(d["worldwide_gross"].replace(/,/g,"").replace("$","")) ;
+      
+    });
+
+      //return true if u want to keep element
+    function keep(d) {
+      if (d != "NA"&& d != "N/A" && d != "" ){return true;}
+      else{return false;}
+    }
+
+
+    data = 
+      data.filter( d => 
+        keep(d['rank_in_year']) &&
+        keep(d['rating']) &&
+        keep(d['imdb_rating']) &&
+        keep(d['title']) &&
+        keep(d['worldwide_gross']) &&
+        keep(d['length']) &&
+        keep(d['studio']) &&
+        keep(d['year']) &&
+        keep(d['Main_Genre'])
+      );
+
+        blockbustersData = data;
+        console.log(data)
+
+      let maxYOR = d3.max(data, function (d) { return d['year'] });
+      let maxWWG = d3.max(data, function (d) { return d['worldwide_gross'] });
+      let maxrIMBD = d3.max(data, function (d) { return d['imdb_rating'] });
+      
+      let minYOR = d3.min(data, function (d) { return d['year'] });
+      let minWWG = d3.min(data, function (d) { return d['worldwide_gross'] });
+      let minrIMBD = d3.min(data, function (d) { return d['imdb_rating'] });
+      
+      let svgB = d3.select("#p1").append("svg").attr("width","800").attr("height","500");
+      let width = svgB.attr("width");
+      let height = svgB.attr("height");
+
+      // This is a clever way to do padding that is more adjustable when you are designing
+      let margin = {  top: 30, right: 162, bottom: 10, left: 50 };
+      let chartWidth = width - margin.left - margin.right; // If you know the key is fixed text, you can access it with . instead of [""]
+      let chartHeight = height - margin.top - margin.bottom - 20;
+
+      const xYOR = d3.scaleLinear()
+        .domain([minYOR, maxYOR])
+        .range([0, chartWidth]);  
+
+      const yWWG = d3.scaleLog()
+            .domain([minWWG, maxWWG])
+            .range([chartHeight, 0]);
+
+      let y_axis = d3.axisLeft().scale(yWWG)
+      svgB.append("g").attr("class", "y axis") // Not d3-required. Just helpful for styling
+        .attr("transform","translate("+ (margin.left-10) +","+ margin.top +")")
+        .call(y_axis);
+
+      let Ygridlines = d3.axisLeft(yWWG).tickSize(-chartWidth).tickFormat("");
+       svgB.append("g")
+          .attr("class",  "gridlines")
+          .attr("transform", "translate(" + (margin.left - 10) + "," + margin.top + ")")
+          .call(Ygridlines);
+
+
+      let x_axis = d3.axisBottom().scale(xYOR);
+      svgB.append("g").attr("class", "y axis") // Not d3-required. Just helpful for styling
+        .attr("transform","translate("+ margin.left +","+ (margin.top + chartHeight) +")")
+        .call(x_axis);
+
+        let Xgridlines = d3.axisBottom(xYOR).tickSize(-chartHeight).tickFormat("");
+        svgB.append("g")
+          .attr("class", "gridlines")
+          .attr("transform", "translate(" + margin.left + "," + (margin.top + chartHeight) + ")")
+          .call(Xgridlines);
+
+      let chart = svgB.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+      
+      const rIMBD = d3.scaleLinear()
+            .domain([minrIMBD, maxrIMBD])
+            .range([2, 15]);
+
+      var colorScale = d3.scaleOrdinal(d3.schemeAccent.concat(d3.schemeDark2));
+
+      data.forEach(function(d){
+        let circles = chart.append("circle")
+            .attr("r", (d['imdb_rating']))
+            .attr("cx", xYOR(d['year']))
+            .attr("cy", yWWG(d['worldwide_gross'])) 
+            .style("fill", colorScale(d['Main_Genre']))
+            .style("opacity", ".6")
+            .attr("movie", d["title"]);
+
+            circles.on("mouseover", function(){
+              d3.select(this)
+                .transition().duration(100)
+                .attr("r", rIMBD(d['imdb_rating']) * 2)
+                
+
+              chart.append("text")
+              .attr("id", "b" + d['title'].replace(/[ _\-,.&:'#!\?]/g, ""))
+              .attr("x", xYOR(d['year']) - 30)
+              .attr("y", yWWG(d['worldwide_gross']) - 10)
+              .text(d['title']);
+                
+            })
+            .on("mouseout", function(){
+              d3.select(this)
+                .transition().duration(150)
+                .attr("r", rIMBD(d['imdb_rating']))
+            d3.select("#b" + d['title'].replace(/[ _\-,.&:'#!\?]/g, "")).remove();
+            }) 
+
+          })
+    
+      
+
+
+      
+            
+      
+  });
+
+    ///////////////////Q2///////////
+
+    let svg2 = d3.select("#p2").append("svg").attr("width","400").attr("height","400");
+      svgBack = svg2.append("g").style("stroke-width", "2px").style("stroke", "#000").style("fill", "none");
+      svgBack.append("path")
+      .attr("d", "M75 350 H 140 V 250 H 160 V 350 H 350")
+
+      svgBack.append("circle").attr("cx", "75").attr("cy", "350").attr("r", "5").style("fill", "#EFF")
+      svgBack.append("rect").attr("x", "200").attr("y", 350).attr("width", "50").attr("height", "10").style("fill", "#FDD")
+     
+     var xScale = d3.scaleLinear()
+        .domain([0, 35])
+        .range([75, 250]);  
+
+      var yScale = d3.scaleLinear()
+            .domain([0, 25])
+            .range([350, 225]);
+
+      data = [];
+      
+
+
+      function trajectory ( iv, angle){
+        rad = angle * (Math.PI / 180);
+        console.log(rad);
+        trajArr = [] ;
+        var obj1 = { 
+        ground : 0,
+        x : 0, 
+        y : 0,
+        xV : iv * Math.cos(rad),
+        yV : iv * Math.sin(rad),
+        xA : 0,
+        yA : -3.71 / 10}
+        
+        var y = 0; var x = 0;  var count = 0; var ground = 0;
+        trajArr.push(obj1);
+        while(y > ground || count==0){
+          var xV = trajArr[count].xV + trajArr[count].xA;
+          var yV = trajArr[count].yV + trajArr[count].yA ;
+          x = x + .1 * xV;
+          y = y + .1 * yV;
+          if(x>=13 && x<=17){ground = 20;}
+          else{ground = 0;}
+          var obj1 = {
+            ground : ground,
+            x : x,
+            y : y,
+            xV : xV,
+            yV : yV,
+            xA : 0,
+            yA : -3.71 / 10}
+
+            count++;
+            if(y >= ground ){
+              trajArr.push(obj1);
+            }
+            
+             
+            
+          }
+          if(trajArr[trajArr.length -1].y != 0&&ground != 20){
+     
+              var time1 = trajArr.length * .1;
+               console.log("time"+ time1);
+               range = time1 * trajArr[0].xV;
+               console.log("r"+ range);
+               obj1 = {
+                ground : ground,
+                x : range,
+                y : 0,
+                xV : xV,
+                yV : yV,
+                xA : 0,
+                yA : -3.71 / 10}
+                trajArr.push(obj1);
+
+             }
+             if(x>13 && x <17 && ground == 20){
+               var newtime = (13/trajArr[0].xV);
+               console.log(newtime)
+               var h1 = trajArr[0].yV * newtime - ((.5)*(3.71 / 10)*Math.pow(newtime,2));
+               console.log("highe"+ h1);
+               obj1 = {
+                ground : ground,
+                x : 13,
+                y : h1,
+                xV : xV,
+                yV : yV,
+                xA : 0,
+                yA : -3.71 / 10}
+                trajArr.push(obj1);
+
+             }
+
+             
+           
+
+
+
+
+        console.log(trajArr);
+        return trajArr;
+      }
+
+      var texrTImes = 20;
+
+      function plotTrajectory(arr, color){
+        var time = (arr.length-1) * .1;
+        var range = Math.sqrt(Math.pow(arr[arr.length-1].x,2)+ Math.pow(arr[arr.length-1].y,2));
+        
+        var points = [];
+        
+        arr.forEach( d => {
+          var coor = [xScale(d.x),yScale(d.y)];
+          points.push(coor)
+        })
+       
+        console.log(points)
+        var lineGenerator = d3.line()
+        var pathData = lineGenerator(points)
+        svgBack.append("path").attr('d', pathData).style("stroke", color).style("opacity", ".25").style("stroke-width", "5")
+
+      var message = "";
+      if(arr[arr.length-1].x >= 25 && arr[arr.length-1].x <= 35){
+          message = "HIT"
+      }
+      else{
+        message = "MISSed"
+      }
+      
+      message = message + ", " + time.toFixed(0) + "s, " + range.toFixed(2) + "m"
+      if(color != "red"){
+        svgBack.append("text").text(d => message )
+                .style("font-family", "sans-serif")
+                .style("stroke-width", "1")
+                .style("stroke", color)
+                .style("font-size", "x-small")
+                .style("text-anchor", "middle")
+                .style("dominant-baseline", "middle" )
+                .attr("x", xScale(arr[arr.length-1].x))
+                .attr("y", yScale(arr[arr.length-1].y)+texrTImes);
+                texrTImes +=10;
+
+      }
+      
+
+      }
+      var a =  trajectory(14, 75);
+      var b =  trajectory(80, 45);
+      var c =  trajectory(18, 80);
+
+      plotTrajectory(a, "black")
+      plotTrajectory(b, "blue")
+      plotTrajectory(c, "blue")
+
+      function trajectoryWithWind ( iv, angle, windA){
+        rad = angle * (Math.PI / 180);
+        console.log(rad);
+        trajArr = [] ;
+        var obj1 = { 
+        ground : 0,
+        x : 0, 
+        y : 0,
+        xV : iv * Math.cos(rad),
+        yV : iv * Math.sin(rad),
+        xA : windA/10,
+        yA : -3.71 / 10}
+        
+        var y = 0; var x = 0;  var count = 0; var ground = 0;
+        trajArr.push(obj1);
+        
+        while(y >= ground){
+          var xV = trajArr[count].xV + trajArr[count].xA;
+          var yV = trajArr[count].yV + trajArr[count].yA ;
+          x = x + .1 * xV;
+          y = y + .1 * yV;
+          if(x>=13 && x<=17){ground = 20;}
+          else{ground = 0;}
+          var obj1 = {
+            ground : ground,
+            x : x,
+            y : y,
+            xV : xV,
+            yV : yV,
+            xA : windA/10,
+            yA : -3.71 / 10}
+
+            count++;
+            if(y >= 0 ){
+              trajArr.push(obj1);
+            }
+            
+          }
+        console.log(trajArr);
+        return trajArr;
+
+      }
+
+      var arr2 = trajectoryWithWind(13, 80, 1);
+      var arr3 = trajectory(13, 80);
+      plotTrajectory(arr2, "red");
+      plotTrajectory(arr3, "red");
+      
+</script>
+
+
+
+
+
+
+</body>
+
+</html>

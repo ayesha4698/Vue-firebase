@@ -1,0 +1,53 @@
+addi sp, x0, 10000000
+addi fp, x0, 0
+addi a0, x0, 0
+jal ra, r_fibonacci
+jal x0, exit
+
+
+r_fibonacci:
+addi sp, sp, -16
+sw a0, 12 (sp)
+sw ra, 8 (sp)
+sw fp, 4 (sp)
+sw a0, 0 (sp)
+
+
+beq a0, x0, return_0
+jal x0, test1
+
+return_0:
+jal x0, return
+
+test1:
+addi x5, x0, 1
+beq a0, x5, return_1
+jal x0, recursive_call
+
+return_1:
+add x6, x6, x5
+jal x0, return 
+
+recursive_call:
+lw a0, 12 (sp)
+add a0, a0, -2
+jal ra, r_fibonacci
+
+
+lw a0, 12 (sp)
+addi a0, a0, -1
+jal ra, r_fibonacci
+
+
+return:
+lw ra, 8 (sp)
+lw fp, 4(sp)
+lw x19, 0 (sp)
+addi sp, sp, 16
+
+jalr x0, ra, 0
+
+exit:
+addi a0, x6, 0 
+
+

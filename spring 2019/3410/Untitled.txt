@@ -1,0 +1,4 @@
+addi x1, x0, 4
+add x1, x0, x1 		#x1 will be 5
+add x2, x0, x16 	#x2 will be 2047, max case
+add x3, x0, x0 		#x3 will be 0, min case
